@@ -7,40 +7,41 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Image = UnityEngine.UI.Image;
 
 public class CarEngine : MonoBehaviour
 {
     public Transform[] allPath = null;
     private int numberOfPath;
     private Transform path;
-    private List<Transform> pathList;
+    private Dictionary<int, Transform> pathList;
     public float turnSpeed = 30f;
-    Timer timer;
+    private float timer;
     private int timeWhenWin = 0;
 
     //set wheel angle
-    private int correctNode = 0 ;
+    private int correctNode = 0;
     public float maxSteerAngle = 45f;
     public WheelCollider wheelFL;
     public WheelCollider wheelFR;
     public WheelCollider wheelRL;
-    public WheelCollider wheelRR;   
+    public WheelCollider wheelRR;
 
     //speed of car
     public float maxMotorTouqe = 100f;
     public float currentSpeed;
-    public float maxSpeed = 150;
-   
+    public float maxSpeed = 150f;
+
 
     //braking
     public bool isBraking = false;
     public float maxBrakeTouqe = 150f;
 
-    [Header ("Sensors")]
+    [Header("Sensors")]
     public float sensorLength = 1f;
-    public Vector3 frontSensorVector = new Vector3(0,0.2f,0.5f);
+    public Vector3 frontSensorVector = new Vector3(0, 0.2f, 0.5f);
     public float frontSenSor = 0.5f;
-    public float sideSenSor = 0.3f;
+    public float sideSenSor = 0.5f;
     public float sensorAngle = 30;
     private bool avoiding = false;
     //private float targetSteerAngle = 0;
@@ -52,41 +53,57 @@ public class CarEngine : MonoBehaviour
     public GameObject realPlayer;
     private bool isReturn = true;
     public int[] requirePoint = null;
-    private int countOfBackNode = 0;
 
     //Check Round
     public int roundToWin;
     private int countCheckReturn = 0;
     private int countCheckpoint = 0;
     private int countAllCheckpointInPath;
-    private bool isWin = false;
+    private bool isEnd = false;
     //int stopCount = 0;
-    public Lap lapOfRealPlayer;
+    //public Lap lapOfRealPlayer;
+
+    //Character
+    public CharacterCreation characterDB;
+    public Sprite artworkSprite;
+    public Image charImage;
+    private int randomOption = 0;
 
     void Start()
     {
-        
-        //set Time
-        timer = FindObjectOfType<Timer>(); 
-        numberOfPath = Random.Range(0,allPath.Length-1);
 
+        //set Time
+        timer = 0f;
+        //set character
+        randomOption = Random.Range(0, characterDB.characterCount());
+        Character character = characterDB.getCharacter(randomOption);
+        artworkSprite = character.imageCharacter;
+        charImage.sprite = artworkSprite;
         //set Path
+        numberOfPath = Random.Range(0, allPath.Length - 1);
         //Debug.Log(requirePoint[numberOfPath]);
         //path = allPath[numberOfPath];
         path = allPath[0];
         Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
         countAllCheckpointInPath = pathTransforms.Length;
-        pathList = new List<Transform>();
-        for (int i = 0; i < pathTransforms.Length; i += 1)
+        pathList = new Dictionary<int, Transform>();
+        for (int i = 0; i < pathTransforms.Length - 1; i += 1)
         {
-            if (pathTransforms[i] != path.transform)
+            if (i == pathTransforms.Length - 1)
             {
-                pathList.Add(pathTransforms[i]);
+                pathList.Add(i, pathTransforms[0]);
             }
+            else
+            {
+                pathList.Add(i, pathTransforms[i + 1]);
+            }
+
         }
-        
+
     }
-   
+    private void Update(){
+        timer += Time.deltaTime;
+    }
     private void FixedUpdate()
     {
         Sensors();
@@ -114,9 +131,9 @@ public class CarEngine : MonoBehaviour
 
             //stopCount += 1;
             //Debug.Log("stopCount = "+ stopCount);
-            if (isWin == true) {
-                timeWhenWin = (int)timer.timeToDisplay;
-                Debug.Log("Win at "+ timeWhenWin);
+            if (isEnd == true) {
+                timeWhenWin = (int)timer;
+                //Debug.Log("Win at "+ timeWhenWin);
                 Destroy(this);
                 //SceneManager.LoadScene("UniversalMap");
             }
@@ -126,7 +143,8 @@ public class CarEngine : MonoBehaviour
     private void Sensors()
     {
         RaycastHit hit; // laser
-        Vector3 sensorsStartPos = transform.position + frontSensorVector;
+        //Vector3 sensorsStartPos = transform.position + frontSensorVector;
+        Vector3 sensorsStartPos = transform.position ;
         sensorsStartPos += transform.forward * frontSensorVector.z;
         sensorsStartPos += transform.up * frontSensorVector.y;
         float avoidMultiplyer = 0;
@@ -198,13 +216,15 @@ public class CarEngine : MonoBehaviour
             }
 
         }
+
+        
         if (avoiding)
         {
            //smooth turn
            //targetSteerAngle = maxSteerAngle * avoidMultiplyer;
            wheelFL.steerAngle = maxSteerAngle * avoidMultiplyer;
            wheelFR.steerAngle = maxSteerAngle * avoidMultiplyer;
-    
+
         }
     
     }
@@ -226,11 +246,13 @@ public class CarEngine : MonoBehaviour
         {
             wheelFL.motorTorque = maxMotorTouqe;
             wheelFR.motorTorque = maxMotorTouqe;
+            
         }
         else if (item)
         {
             wheelFL.motorTorque = maxMotorTouqe*2;
             wheelFR.motorTorque = maxMotorTouqe*2;
+
 
         }
         else
@@ -239,17 +261,18 @@ public class CarEngine : MonoBehaviour
             wheelFR.motorTorque = 0;
         }
 
-
     }
 
     private void CheckWaypointDistance() {
-        if (Vector3.Distance(transform.position, pathList[correctNode].position) < 10f) {
+        
+        if (pathList.ContainsKey(correctNode) && Vector3.Distance(transform.position, pathList[correctNode].position) < 10f) {
             if (correctNode == pathList.Count - 1)
             {
                 correctNode = 0;
                 countCheckpoint += 1;
-                countOfBackNode = 0;
+                
             }
+            
             else {
                 correctNode++;
                 countCheckpoint += 1;
@@ -308,42 +331,55 @@ public class CarEngine : MonoBehaviour
                   if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
                   {
                          Debug.Log("วัตถุ A อยู่ด้านหน้าวัตถุ B");
-                         if (correctNode - 2 >= 0)
-                         {
-                            if (countOfBackNode < 1)
-                            {
-                                correctNode -= 2;
-                                countCheckpoint -= 2;
-                                countOfBackNode += 1;
-                            }
-                                //Debug.Log("countCheckpoint = " + countCheckpoint);
-                         }
 
-                            //Debug.Log("corectNode = " + correctNode);
-                        }
-                  }
-                  else if ((distance < 0 && isReturn == false) || (distance > 0 && isReturn == true))
-                  {
-                        if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
+                        //correctNode -= 2;
+                        //countCheckpoint -= 2;
+                        path = allPath[1];
+                        Transform[] pathTransformsNew = path.GetComponentsInChildren<Transform>();
+                        //Debug.Log(path.GetComponent<Transform>().name);
+                        for (int i = correctNode; i < pathTransformsNew.Length; i += 1)
                         {
-                            Debug.Log("วัตถุ A อยู่ด้านหลังวัตถุ B");
-                            if (correctNode + 1 < pathList.Count)
+                            if (pathTransformsNew[i] != path.transform)
                             {
-                                correctNode += 1;
-                                countCheckpoint += 1;
-                                //Debug.Log("countCheckpoint = " + countCheckpoint);
+                                pathList[i] = pathTransformsNew[i];
                             }
-
-                            //Debug.Log("corectNode = " + correctNode);
                         }
+
+                    //Debug.Log("corectNode = " + correctNode);
+                    //Debug.Log("countCheckpoint = " + countCheckpoint);
+
+
+                    //Debug.Log("corectNode = " + correctNode);
                   }
-                  else
-                  {
+            }
+            else if ((distance < 0 && isReturn == false) || (distance > 0 && isReturn == true))
+            {
+                   if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
+                   {
+                            Debug.Log("วัตถุ A อยู่ด้านหลังวัตถุ B");
+                            //correctNode += 1;
+                            //countCheckpoint += 1;
+                            //Debug.Log("countCheckpoint = " + countCheckpoint);
+                            path = allPath[2];
+                            Transform[] pathTransformsNew = path.GetComponentsInChildren<Transform>();
+                            //Debug.Log(path.GetComponent<Transform>().name);
+                            for (int i = correctNode; i < pathTransformsNew.Length; i += 1)
+                            {
+                                if (pathTransformsNew[i] != path.transform)
+                                {
+                                    pathList[i] = pathTransformsNew[i];
+                                }       
+                            }
+                    
+                    }   
+            }
+            else
+            {
                         //Debug.Log("วัตถุ A ตั้งฉากกับวัตถุ B");
 
-                  }
+            }
                     //Debug.Log("allCheckpoint =" + countCheckpoint);
-             }
+         }
         
         
     }
@@ -351,10 +387,29 @@ public class CarEngine : MonoBehaviour
     private void CheckLapCount() {
         int allCheckpoint = (roundToWin * countAllCheckpointInPath) - (roundToWin * 1) ;
         int allReturn = (roundToWin * 2) + 1 ;
-        //Debug.Log(allCheckpoint);
 
+        //Debug.Log(allCheckpoint);
+        for (int j = 3; j < allReturn ;j+=2) {
+            if(countCheckReturn == j) {
+                path = allPath[0];
+                Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
+                pathList = new Dictionary<int, Transform>();
+                for (int i = 0; i < pathTransforms.Length-1; i += 1)
+                {
+                    if (i == pathTransforms.Length - 1)
+                    {
+                        pathList.Add(i, pathTransforms[0]);
+                    }
+                    else {
+                        pathList.Add(i, pathTransforms[i+1]);
+                    }
+                    
+                }
+            }
+            
+        }
         if (countCheckpoint >= allCheckpoint && countCheckReturn >= allReturn) {
-            isWin = true;
+            isEnd = true;
             //Debug.Log("WIN");
         }
     }

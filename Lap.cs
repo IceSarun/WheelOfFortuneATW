@@ -25,20 +25,22 @@ public class Lap : MonoBehaviour
     private void Start()
     {   
         textCheck = "Lose";
-        Debug.Log(round.roundToWin);
+        //Debug.Log(round.roundToWin);
+        //use round to win from AI enenmy
         roundText.text = countRound.ToString() + "/" + round.roundToWin + " Round";
         Ai = GameObject.FindGameObjectWithTag("Bot");
         realPlayer = GameObject.FindGameObjectWithTag("Player");
-        //Debug.Log(Ai.name);
+        //Debug.Log(realPlayer.name);
 
         for (int i = 0; i < 2 ;i++) {
             checkCountOfCheckpoint[i] = 0;
+
         }
     }
     public void Update()
-    {
+    {   
         if (realPlayer.GetComponent<PrometeoCarController>().carSpeed <= 0 ) {
-            speed.text = "0 KM./Hr.";
+            speed.text = "0 KM./HR.";
         }
         speedOfCar = (int) realPlayer.GetComponent<PrometeoCarController>().carSpeed;
         speed.text = speedOfCar.ToString() + " KM./Hr.";
@@ -49,7 +51,20 @@ public class Lap : MonoBehaviour
         if (collider.CompareTag("CheckReturn"))
         {
             countAllCheckpointWithTrigger++;
+            //Debug.Log("All" + countAllCheckpointWithTrigger);
             checkCountOfCheckpoint[collider.GetComponent<Checkpoint>().checkpointID]++;
+            //Debug.Log("CheckPoint [ " + collider.GetComponent<Checkpoint>().checkpointID + " ] = " + checkCountOfCheckpoint[collider.GetComponent<Checkpoint>().checkpointID]);
+            
+            //case วนเข้าออกแลปแรก
+            if (checkCountOfCheckpoint[0] >= 2 && checkCountOfCheckpoint[1] == 0) {
+                checkCountOfCheckpoint[0] = 1;
+            }
+            //case วนเข้าออกแลปสอง
+            if (checkCountOfCheckpoint[0] >= 1 && checkCountOfCheckpoint[1] >=1)
+            {
+                checkCountOfCheckpoint[1] = 1;
+            }
+            //case วนตรงตามเงื่อนไข
             if (checkCountOfCheckpoint[0] == 2 && checkCountOfCheckpoint[1] == 1) {
                 countRound++;
                 checkCountOfCheckpoint[0] = 1;
@@ -60,14 +75,14 @@ public class Lap : MonoBehaviour
         }
         timer = FindObjectOfType<Timer>(); ;
         //checkText.text = timer.timeToDisplay.ToString();
-
-        if (countRound == round.roundToWin)
+        if (collider.CompareTag("Stop")) {
+            if (countRound >= round.roundToWin)
             {
-                textCheck = "Win";
+                textCheck = "End";
                 SceneManager.LoadScene("Win");
-            //timer.timeToDisplay //return time value when real player win!!
+                //timer.timeToDisplay //return time value when real player win!!
+            }
         }
-
     }
     public int getCountCheckpoint() { 
         return countAllCheckpointWithTrigger;

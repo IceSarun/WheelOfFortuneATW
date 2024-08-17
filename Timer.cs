@@ -56,7 +56,12 @@ public class Timer : MonoBehaviour
             timeToDisplay = timeLimit;
             return;
         }
-
+        if (timerType == TimerType.Stopwatch && timeToDisplay < 0.00f)
+        {
+            timeToDisplay = 0.0f;
+            return;
+        }
+        
         timeToDisplay += timerType == TimerType.Countdown ? -Time.deltaTime : Time.deltaTime;
 
         TimeSpan timeSpan = TimeSpan.FromSeconds(timeToDisplay);
