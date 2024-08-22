@@ -6,8 +6,10 @@ public enum EnumAbilityCode
 {
     UNSPECIFIED,
     MAX_SPEED,
-    REVERSE_TURN_SPEED,
-    MAX_STEER_ANGLE,
+    WEATHER_RAIN,
+    WEATHER_WIND,
+    WEATHER_SMOKE,
+    WEATHER_SNOW,
     ADD_TIME,
     SUB_TIME
 

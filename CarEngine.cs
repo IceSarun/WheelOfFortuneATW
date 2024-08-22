@@ -50,7 +50,7 @@ public class CarEngine : MonoBehaviour
     private bool item = false;
 
     //Check Player
-    public GameObject realPlayer;
+    private GameObject realPlayer;
     private bool isReturn = true;
     public int[] requirePoint = null;
 
@@ -65,9 +65,10 @@ public class CarEngine : MonoBehaviour
 
     //Character
     public CharacterCreation characterDB;
+    public Character character;
     public Sprite artworkSprite;
     public Image charImage;
-    private int randomOption = 0;
+    public int randomOption = 0;
 
     void Start()
     {
@@ -75,14 +76,13 @@ public class CarEngine : MonoBehaviour
         //set Time
         timer = 0f;
         //set character
-        randomOption = Random.Range(0, characterDB.characterCount());
-        Character character = characterDB.getCharacter(randomOption);
-        artworkSprite = character.imageCharacter;
-        charImage.sprite = artworkSprite;
+        setCharacter();
+
         //set Path
         numberOfPath = Random.Range(0, allPath.Length - 1);
         //Debug.Log(requirePoint[numberOfPath]);
         //path = allPath[numberOfPath];
+        realPlayer = GameObject.FindGameObjectWithTag("Player");
         path = allPath[0];
         Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
         countAllCheckpointInPath = pathTransforms.Length;
@@ -101,7 +101,7 @@ public class CarEngine : MonoBehaviour
         }
 
     }
-    private void Update(){
+    private void Update() {
         timer += Time.deltaTime;
     }
     private void FixedUpdate()
@@ -116,6 +116,20 @@ public class CarEngine : MonoBehaviour
         //LerpToSteerAngle();
     }
 
+    public void setCharacter() {
+        randomOption = Random.Range(0, characterDB.characterCount());
+        updateCharacter(randomOption);
+    }
+
+    public void updateCharacter(int selectOption)
+    {
+        character = characterDB.getCharacter(selectOption);
+        artworkSprite = character.imageCharacter;
+        charImage.sprite = artworkSprite;
+
+    }
+
+
     public void OnTriggerEnter(Collider collider)
     {
         if (collider.CompareTag("CheckReturn"))
@@ -124,19 +138,21 @@ public class CarEngine : MonoBehaviour
             countCheckReturn += 1;
             //Debug.Log("return!");
             //Debug.Log("Return =" + countCheckReturn);
-           
         }
         if (collider.CompareTag("Stop"))
         {
-
             //stopCount += 1;
             //Debug.Log("stopCount = "+ stopCount);
             if (isEnd == true) {
                 timeWhenWin = (int)timer;
                 //Debug.Log("Win at "+ timeWhenWin);
-                Destroy(this);
+                Destroy(GameObject.FindGameObjectWithTag("Bot"), 10);
                 //SceneManager.LoadScene("UniversalMap");
             }
+        }
+        if (collider.CompareTag("Item"))
+        {
+            Destroy(collider.gameObject);
         }
     }
 
@@ -144,7 +160,7 @@ public class CarEngine : MonoBehaviour
     {
         RaycastHit hit; // laser
         //Vector3 sensorsStartPos = transform.position + frontSensorVector;
-        Vector3 sensorsStartPos = transform.position ;
+        Vector3 sensorsStartPos = transform.position;
         sensorsStartPos += transform.forward * frontSensorVector.z;
         sensorsStartPos += transform.up * frontSensorVector.y;
         float avoidMultiplyer = 0;
@@ -217,41 +233,41 @@ public class CarEngine : MonoBehaviour
 
         }
 
-        
+
         if (avoiding)
         {
-           //smooth turn
-           //targetSteerAngle = maxSteerAngle * avoidMultiplyer;
-           wheelFL.steerAngle = maxSteerAngle * avoidMultiplyer;
-           wheelFR.steerAngle = maxSteerAngle * avoidMultiplyer;
+            //smooth turn
+            //targetSteerAngle = maxSteerAngle * avoidMultiplyer;
+            wheelFL.steerAngle = maxSteerAngle * avoidMultiplyer;
+            wheelFR.steerAngle = maxSteerAngle * avoidMultiplyer;
 
         }
-    
+
     }
 
     private void ApplySteer() {
         if (avoiding) return;
         Vector3 relativeVector = transform.InverseTransformPoint(pathList[correctNode].position);
-        float newSteer = (relativeVector.x / relativeVector.magnitude)* maxSteerAngle;
+        float newSteer = (relativeVector.x / relativeVector.magnitude) * maxSteerAngle;
         //targetSteerAngle = newSteer;
-        wheelFL.steerAngle= newSteer;
-        wheelFR.steerAngle= newSteer;
-   
+        wheelFL.steerAngle = newSteer;
+        wheelFR.steerAngle = newSteer;
+
     }
 
     private void Drive() {
-        currentSpeed = 4 * Mathf.PI * wheelFL.radius * wheelFL.rpm * 60 / 1000; 
+        currentSpeed = 4 * Mathf.PI * wheelFL.radius * wheelFL.rpm * 60 / 1000;
 
         if (0 < currentSpeed && currentSpeed < maxSpeed)
         {
             wheelFL.motorTorque = maxMotorTouqe;
             wheelFR.motorTorque = maxMotorTouqe;
-            
+
         }
         else if (item)
         {
-            wheelFL.motorTorque = maxMotorTouqe*2;
-            wheelFR.motorTorque = maxMotorTouqe*2;
+            wheelFL.motorTorque = maxMotorTouqe * 2;
+            wheelFR.motorTorque = maxMotorTouqe * 2;
 
 
         }
@@ -264,15 +280,15 @@ public class CarEngine : MonoBehaviour
     }
 
     private void CheckWaypointDistance() {
-        
+
         if (pathList.ContainsKey(correctNode) && Vector3.Distance(transform.position, pathList[correctNode].position) < 10f) {
             if (correctNode == pathList.Count - 1)
             {
                 correctNode = 0;
                 countCheckpoint += 1;
-                
+
             }
-            
+
             else {
                 correctNode++;
                 countCheckpoint += 1;
@@ -324,89 +340,88 @@ public class CarEngine : MonoBehaviour
 
             //Debug.Log(positionPlayer);
             //Debug.Log(positionAI);
-            
-            
+
+
             if ((distance > 0 && isReturn == false) || (distance < 0 && isReturn == true))
             {
-                  if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
-                  {
-                         Debug.Log("วัตถุ A อยู่ด้านหน้าวัตถุ B");
+                if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
+                {
+                    Debug.Log("วัตถุ A อยู่ด้านหน้าวัตถุ B");
 
-                        //correctNode -= 2;
-                        //countCheckpoint -= 2;
-                        path = allPath[1];
-                        Transform[] pathTransformsNew = path.GetComponentsInChildren<Transform>();
-                        //Debug.Log(path.GetComponent<Transform>().name);
-                        for (int i = correctNode; i < pathTransformsNew.Length; i += 1)
+                    //correctNode -= 2;
+                    //countCheckpoint -= 2;
+                    path = allPath[1];
+                    Transform[] pathTransformsNew = path.GetComponentsInChildren<Transform>();
+                    //Debug.Log(path.GetComponent<Transform>().name);
+                    for (int i = correctNode; i < pathTransformsNew.Length; i += 1)
+                    {
+                        if (pathTransformsNew[i] != path.transform)
                         {
-                            if (pathTransformsNew[i] != path.transform)
-                            {
-                                pathList[i] = pathTransformsNew[i];
-                            }
+                            pathList[i] = pathTransformsNew[i];
                         }
+                    }
 
                     //Debug.Log("corectNode = " + correctNode);
                     //Debug.Log("countCheckpoint = " + countCheckpoint);
 
 
                     //Debug.Log("corectNode = " + correctNode);
-                  }
+                }
             }
             else if ((distance < 0 && isReturn == false) || (distance > 0 && isReturn == true))
             {
-                   if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
-                   {
-                            Debug.Log("วัตถุ A อยู่ด้านหลังวัตถุ B");
-                            //correctNode += 1;
-                            //countCheckpoint += 1;
-                            //Debug.Log("countCheckpoint = " + countCheckpoint);
-                            path = allPath[2];
-                            Transform[] pathTransformsNew = path.GetComponentsInChildren<Transform>();
-                            //Debug.Log(path.GetComponent<Transform>().name);
-                            for (int i = correctNode; i < pathTransformsNew.Length; i += 1)
-                            {
-                                if (pathTransformsNew[i] != path.transform)
-                                {
-                                    pathList[i] = pathTransformsNew[i];
-                                }       
-                            }
-                    
-                    }   
+                if ((correctNode != 0 || correctNode != requirePoint[numberOfPath] || correctNode + 1 != requirePoint[numberOfPath]))
+                {
+                    Debug.Log("วัตถุ A อยู่ด้านหลังวัตถุ B");
+                    //correctNode += 1;
+                    //countCheckpoint += 1;
+                    //Debug.Log("countCheckpoint = " + countCheckpoint);
+                    path = allPath[2];
+                    Transform[] pathTransformsNew = path.GetComponentsInChildren<Transform>();
+                    //Debug.Log(path.GetComponent<Transform>().name);
+                    for (int i = correctNode; i < pathTransformsNew.Length; i += 1)
+                    {
+                        if (pathTransformsNew[i] != path.transform)
+                        {
+                            pathList[i] = pathTransformsNew[i];
+                        }
+                    }
+
+                }
             }
             else
             {
-                        //Debug.Log("วัตถุ A ตั้งฉากกับวัตถุ B");
+                //Debug.Log("วัตถุ A ตั้งฉากกับวัตถุ B");
 
             }
-                    //Debug.Log("allCheckpoint =" + countCheckpoint);
-         }
-        
-        
+            //Debug.Log("allCheckpoint =" + countCheckpoint);
+        }
+
+
     }
 
     private void CheckLapCount() {
-        int allCheckpoint = (roundToWin * countAllCheckpointInPath) - (roundToWin * 1) ;
-        int allReturn = (roundToWin * 2) + 1 ;
+        int allCheckpoint = (roundToWin * countAllCheckpointInPath) - (roundToWin * 1);
+        int allReturn = (roundToWin * 2) + 1;
 
         //Debug.Log(allCheckpoint);
-        for (int j = 3; j < allReturn ;j+=2) {
-            if(countCheckReturn == j) {
+        for (int j = 3; j < allReturn; j += 2) {
+            if (countCheckReturn == j) {
                 path = allPath[0];
                 Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
                 pathList = new Dictionary<int, Transform>();
-                for (int i = 0; i < pathTransforms.Length-1; i += 1)
+                for (int i = 0; i < pathTransforms.Length - 1; i += 1)
                 {
                     if (i == pathTransforms.Length - 1)
                     {
                         pathList.Add(i, pathTransforms[0]);
                     }
                     else {
-                        pathList.Add(i, pathTransforms[i+1]);
+                        pathList.Add(i, pathTransforms[i + 1]);
                     }
-                    
                 }
             }
-            
+
         }
         if (countCheckpoint >= allCheckpoint && countCheckReturn >= allReturn) {
             isEnd = true;
@@ -415,6 +430,16 @@ public class CarEngine : MonoBehaviour
     }
 
     public int getTimeAI() {
-        return timeWhenWin;
+        if (timeWhenWin > 0)
+        {
+            return timeWhenWin;
+        }
+        else
+        {
+            return (int)timer;
+        }
     }
+
+
+  
 }

@@ -2,30 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Item : MonoBehaviour
+[System.Serializable]
+public class Item
 {
-    private string nameItem ="Unknow";
-    private int ability = 0;
+    public string nameItem ="Unknow";
+    public GameObject itemObject;
 
     public string getNameItem() 
     { 
         return nameItem; 
     }
-    public void setName(string name)
-    {
-        nameItem = name;
-    }
 
-    public int getAbility() 
+    public GameObject getObjectItem() 
     { 
-        return ability;
+        return itemObject; 
     }
-
-    public void setAbility(int value)
-    {
-        ability = value;
-    }
-
     
 
 }

@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public Sprite artworkSprite;
     public Image charImage;
     private int selectOption = 0;
+    private Character character;
 
     void Start()
     {
@@ -27,7 +28,7 @@ public class Player : MonoBehaviour
 
     public void updateCharacter(int selectOption)
     {
-        Character character = characterDB.getCharacter(selectOption);
+        character = characterDB.getCharacter(selectOption);
         artworkSprite = character.imageCharacter;
         charImage.sprite = artworkSprite;
 
@@ -38,7 +39,5 @@ public class Player : MonoBehaviour
         selectOption = PlayerPrefs.GetInt("selectedOption");
     }
 
-    public Character getPlayerCharacter() { 
-        return characterDB.getCharacter(selectOption);
-    }
+
 }

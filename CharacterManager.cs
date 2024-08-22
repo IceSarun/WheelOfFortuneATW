@@ -14,7 +14,6 @@ public class CharacterManager : MonoBehaviour
     public Sprite artworkSprite;
     public Image charImage; 
     private int selectOption = 0;
-    private int abilityCount = 0;
 
     void Start()
     {
@@ -28,9 +27,9 @@ public class CharacterManager : MonoBehaviour
     }
 
     public void nextOption() { 
-        selectOption+=1;
+        selectOption += 1;
         if (selectOption >=  characterDB.characterCount()) {
-            selectOption=0;
+            selectOption = 0;
         }
         updateCharacter(selectOption);
         save();
@@ -47,23 +46,14 @@ public class CharacterManager : MonoBehaviour
         save();
     }
 
-    public void updateCharacter(int selectOption) { 
+    public void updateCharacter(int selectOption) {
+        abilityText.text = "";
         Character character = characterDB.getCharacter(selectOption);
         artworkSprite = character.imageCharacter;
         charImage.sprite = artworkSprite;
         nameText.text = character.nameChar;
-        abilityCount = character.getAbilityCount();
-        //abilityText.text = character.abilityCode[abilityCount].ToString();
-        /*for (int i = 1; i <= abilityCount ;i++) {
-            if (i + 1 > abilityCount)
-            {
-                abilityText.text = abilityText.text + character.abilityCode[i].ToString();
-            }
-            else {
-                abilityText.text = character.abilityCode[i].ToString() + ", ";
-            }
-            
-        }*/
+        checkAbility(character.abilityCode.ToString(), character.value);
+         
     }
 
     private void load()
@@ -77,5 +67,44 @@ public class CharacterManager : MonoBehaviour
 
     public void changeScene() {
         SceneManager.LoadScene("Lobby");
+    }
+
+    public void checkAbility(string textAbi, int value) {
+        switch (textAbi)
+        {
+            case "UNSPECIFIED":
+                abilityText.text += "No Ability";
+                break;
+
+            case "MAX_SPEED":
+                abilityText.text += " + "+ value.ToString() + " Max Speed";
+                break;
+
+            case "WEATHER_RAIN":
+                abilityText.text += "Create rain in map and Decrease the opponent's max speed by " + value.ToString();
+                break;
+
+            case "WEATHER_WIND":
+                abilityText.text += "Create wind in map and Decrease the opponent's max speed by " + value.ToString();
+                break;
+
+            case "WEATHER_SMOKE":
+                abilityText.text += "Create smoke in map and Decrease the opponent's max speed by " + value.ToString();
+                break;
+
+            case "WEATHER_SNOW":
+                abilityText.text += "Create snow in map and Decrease the opponent's max speed by " + value.ToString();
+                break;
+
+            case "ADD_TIME":
+                abilityText.text += "There's a " + value.ToString() + "% chance to reduce the time by 10 seconds when picking up a negative item.";
+                break;
+
+            case "SUB_TIME":
+                abilityText.text += "There's a " + value.ToString() + "% chance to gain 10 extra seconds when picking up a positive item.";
+                break;
+
+        }
+
     }
 }

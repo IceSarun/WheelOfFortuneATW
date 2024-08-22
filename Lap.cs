@@ -43,7 +43,7 @@ public class Lap : MonoBehaviour
             speed.text = "0 KM./HR.";
         }
         speedOfCar = (int) realPlayer.GetComponent<PrometeoCarController>().carSpeed;
-        speed.text = speedOfCar.ToString() + " KM./Hr.";
+        speed.text = speedOfCar.ToString() + " km/h ";
     }
 
     void OnTriggerEnter(Collider collider)
@@ -79,7 +79,16 @@ public class Lap : MonoBehaviour
             if (countRound >= round.roundToWin)
             {
                 textCheck = "End";
-                SceneManager.LoadScene("Win");
+                if (textCheck == "End" && round.getTimeAI() > (int)timer.timeToDisplay) {
+                    //Debug.Log("AI = "+ round.getTimeAI());
+                    //Debug.Log("Player = " + (int)timer.timeToDisplay);
+                    SceneManager.LoadScene("Win");
+                }else if (textCheck == "End" && round.getTimeAI() <= (int)timer.timeToDisplay) {
+                    //Debug.Log("AI = " + round.getTimeAI());
+                    //Debug.Log("Player = " + (int)timer.timeToDisplay);
+                    SceneManager.LoadScene("Lose");
+                }
+                
                 //timer.timeToDisplay //return time value when real player win!!
             }
         }
