@@ -10,6 +10,7 @@ public enum EnumAbilityCode
     WEATHER_WIND,
     WEATHER_SMOKE,
     WEATHER_SNOW,
+    WEATHER_SUNNY,
     ADD_TIME,
     SUB_TIME
 

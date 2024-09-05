@@ -27,7 +27,7 @@ public class TeleportArea : MonoBehaviour
             { 
                 Vector3 position = tp.gameObject.transform.position;
                 position.x += 12;
-                parent = GameObject.Find("RealPlayer");
+                parent = GameObject.FindGameObjectWithTag("Player");
                 //Debug.Log(parent.name);
                 //teleport
                 parent.gameObject.transform.position = position;

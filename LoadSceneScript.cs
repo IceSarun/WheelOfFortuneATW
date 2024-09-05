@@ -13,6 +13,7 @@ public class LoadSceneScript : MonoBehaviour
     public void LoadTargetScene()
     {
         SceneManager.LoadScene(SceneName);
+        Time.timeScale = 1;
     }
 
 }

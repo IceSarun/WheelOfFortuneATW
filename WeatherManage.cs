@@ -8,46 +8,98 @@ using TMPro;
 
 public class WeatherManage : MonoBehaviour
 {
-    //public Player player;
+    public Player player;
     public CharacterCreation characterDB;
-    private Character playerCharacter;
-    private GameObject Ai;
+    //private GameObject Ai;
     private GameObject objForCreateWeaTher; // Player
     private GameObject parent;
     public WeatherCreation weatherDB;
     private Weather weatherUse;
     public Image image;
     public TMP_Text weatherText;
-    private bool isAbilityWeather = false;
     private bool isHaveWeather = false;
-    private int selectOption = 0;
+    
 
     void Start()
     {
-        //player = gameObject.GetComponent<Player>();
-        if (!PlayerPrefs.HasKey("selectedOption"))
-        {
-            selectOption = 0;
-        }
-        else
-        {
-            load();
-        }
-        updateCharacter(selectOption);
-        playerCharacter = characterDB.getCharacter(selectOption);
-        Ai = GameObject.FindGameObjectWithTag("Bot");
+        player = FindObjectOfType<Player>();
+        //Debug.Log(player.getCharacterFromPlayer().nameChar);
+        
+        
+        //Ai = GameObject.FindGameObjectWithTag("Bot");
         parent = GameObject.FindGameObjectWithTag("Player");
         //Debug.Log("1 : " + Ai.gameObject.GetComponent<AI>()..ToString() + " d ");
         //Debug.Log("1 : "+Ai.gameObject.GetComponent<AI>().character.nameChar + " ok ");
 
         checkWeater();
-        if (isAbilityWeather)
-        {
+        
+        if (isHaveWeather) {
             createWeather();
+        }
+        player.applyAbilityWeather(weatherUse.weatherName);
+    }
+
+    public void createWeather()
+    {
+        switch (weatherUse.weatherName) {
+            case "Rain":
+                image.sprite = weatherUse.imageWeather;
+                objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x, parent.transform.position.y, parent.transform.position.z), weatherUse.weather.transform.rotation);
+                objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
+                objForCreateWeaTher.gameObject.GetComponent<RainScript>().Camera = parent.GetComponentInChildren<Camera>();
+                objForCreateWeaTher.gameObject.GetComponent<RainScript>().RainIntensity = 0.4f;
+                weatherText.text = "Weather: Rain";
+                weatherText.color = Color.green;
+                break;
+
+            case "Wind":
+                image.enabled = false;
+                objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x + 10, parent.transform.position.y + 10, parent.transform.position.z + 10), weatherUse.weather.transform.rotation);
+                objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
+                objForCreateWeaTher.transform.localScale = new Vector3(2, 2, 2);
+                objForCreateWeaTher.transform.Rotate(0, 0, 90);
+                AudioSource audio = GetComponent<AudioSource>();
+                audio.clip = weatherUse.soundOfWheather;
+                audio.Play();
+                weatherText.text = "Weather: Wind";
+                weatherText.color = Color.green;
+                break;
+
+            case "Smoke":
+                image.sprite = weatherUse.imageWeather;
+                image.color = new Color(image.color.r, image.color.g, image.color.b, 0.2f);
+                objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x, parent.transform.position.y - 2, parent.transform.position.z), weatherUse.weather.transform.rotation);
+                objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
+                objForCreateWeaTher.transform.localScale = new Vector3(7, 7, 7);
+                weatherText.text = "Weather: Smoke";
+                weatherText.color = Color.green;
+                break;
+
+            case "Snow":
+                image.sprite = weatherUse.imageWeather;
+                image.color = new Color(image.color.r, image.color.g, image.color.b, 0.12f);
+                objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x + 7, parent.transform.position.y, parent.transform.position.z), weatherUse.weather.transform.rotation);
+                objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
+                objForCreateWeaTher.transform.localScale = new Vector3(2, 2, 2);
+                AudioSource audio2 = GetComponent<AudioSource>();
+                audio2.clip = weatherUse.soundOfWheather;
+                audio2.Play();
+                weatherText.text = "Weather: Snow";
+                weatherText.color = Color.green;
+                break;
+
+            case "Sunny":
+                image.enabled = false;
+                weatherText.text = "Weather: Sunny";
+                weatherText.color = Color.green;
+                break;
+        
         }
 
     }
 
+ 
+    /*
     public void createWeather()
     {
         switch (playerCharacter.abilityCode.ToString())
@@ -116,7 +168,7 @@ public class WeatherManage : MonoBehaviour
                         {
                             weatherUse = weatherDB.getWeather(i);
                             image.sprite = weatherUse.imageWeather;
-                            image.color = new Color(image.color.r, image.color.g, image.color.b, 0.12f);
+                            image.color = new Color(image.color.r, image.color.g, image.color.b, 0.2f);
                             objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x, parent.transform.position.y - 2, parent.transform.position.z), weatherUse.weather.transform.rotation);
                             objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
                             objForCreateWeaTher.transform.localScale = new Vector3(7, 7, 7);
@@ -136,7 +188,7 @@ public class WeatherManage : MonoBehaviour
                         {
                             weatherUse = weatherDB.getWeather(i);
                             image.sprite = weatherUse.imageWeather;
-                            image.color = new Color(image.color.r, image.color.g, image.color.b, 0.12f);
+                            image.color = new Color(image.color.r, image.color.g, image.color.b, 0.2f);
                             objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x, parent.transform.position.y-2, parent.transform.position.z), weatherUse.weather.transform.rotation);
                             objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
                             objForCreateWeaTher.transform.localScale = new Vector3(7, 7, 7);
@@ -154,10 +206,11 @@ public class WeatherManage : MonoBehaviour
                             weatherUse = weatherDB.getWeather(i);
                             image.sprite = weatherUse.imageWeather;
                             image.color = new Color(image.color.r, image.color.g, image.color.b, 0.12f);
-                            objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x, parent.transform.position.y, parent.transform.position.z), weatherUse.weather.transform.rotation);
+                            objForCreateWeaTher = Instantiate(weatherUse.weather, new Vector3(parent.transform.position.x + 7, parent.transform.position.y, parent.transform.position.z), weatherUse.weather.transform.rotation);
                             objForCreateWeaTher.transform.SetParent(gameObject.GetComponentInParent<Player>().transform);
+                            objForCreateWeaTher.transform.localScale = new Vector3(2, 2, 2);
                             weatherText.text = "Weather: Snow";
-                            weatherText.color = Color.red;
+                            weatherText.color = Color.green;
                         }
                     }
                 }
@@ -201,32 +254,20 @@ public class WeatherManage : MonoBehaviour
                 break;
         }
     }
+    */
 
     public void checkWeater()
     {
-        //int randomWheater = Random.Range(0,weatherDB.wheathersCount());
-        //image.enabled = true;
-        //isHaveWeather = true;
-        if (playerCharacter.abilityCode.ToString() == "WEATHER_RAIN" || playerCharacter.abilityCode.ToString() == "WEATHER_WIND" || playerCharacter.abilityCode.ToString() == "WEATHER_SMOKE" || playerCharacter.abilityCode.ToString() == "WEATHER_SNOW")
-        {
-            isAbilityWeather = true;
-            image.enabled = true;
-        }
-        else {
-            weatherText.text = "Weather: Sunny";
-        }
+        int randomWheater = Random.Range(0,weatherDB.wheathersCount());
+        image.enabled = true;
+        isHaveWeather = true;
+        weatherUse = weatherDB.getWeather(randomWheater);
+
+        
     }
 
-    public void updateCharacter(int selectOption)
-    {
-        playerCharacter = characterDB.getCharacter(selectOption);
-
+    public string getWeatherName() {
+        return weatherUse.weatherName;
     }
-
-    private void load()
-    {
-        selectOption = PlayerPrefs.GetInt("selectedOption");
-    }
-
 
 }

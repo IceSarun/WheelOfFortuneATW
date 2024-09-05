@@ -22,7 +22,7 @@ public class LobbyPage : MonoBehaviour
         LeanTween.alpha(fader, 0, 0);
         LeanTween.alpha(fader, 1, 0.5f).setOnComplete(() =>
         {
-            SceneManager.LoadScene("Select Car");
+            SceneManager.LoadScene("Select Map");
         });
     }
 

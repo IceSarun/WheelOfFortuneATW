@@ -15,7 +15,7 @@ public class UniversalManager : MonoBehaviour
     void Start()
     {
         string map = SelectMapPage.selectMap;
-        Debug.Log(map);
+        //Debug.Log(map);
         nameMap.text = "ขอต้อนรับสู่อาณาเขตของ " + map;
         int number = 0;
 

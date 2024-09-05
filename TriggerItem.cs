@@ -11,15 +11,15 @@ public class TriggerItem : MonoBehaviour
     //private int speed;
     private int timeItem;
     private Rigidbody body;
-    public CharacterCreation characterDB;
+    public Player player;
     private Character character;
     private RandomItem randomItem;
-    private bool haveAddTimeAbility = false;
-    private bool haveSubTimeAbility = false;
-    private int[] percent;
+    private int percent;
     public Image stopImage;
     public Image stopBackground;
     public TMP_Text timeADDSUB;
+    public TMP_Text timeADDSUBWithItem;
+    public TMP_Text skillActiveText;
 
     private void Start()
     {
@@ -27,20 +27,8 @@ public class TriggerItem : MonoBehaviour
         stopImage.enabled = false;
         stopBackground.enabled = false;
         timeADDSUB.enabled = false;
-        /*character = characterDB.getCharacter();
-        for (int i = 1; i<= character.getAbilityCount();i++) 
-        {
-            if (character.abilityCode[i].ToString() == "ADD_TIME") {
-                haveAddTimeAbility = true;
-                percent[0] = character.value[i];
-            }
-            if (character.abilityCode[i].ToString() == "SUB_TIME")
-            {
-                haveSubTimeAbility = true;
-                percent[1] = character.value[i];
-            }
-        }*/
-
+        timeADDSUBWithItem.enabled = false;
+        skillActiveText.enabled = false;
 
     }
 
@@ -55,31 +43,50 @@ public class TriggerItem : MonoBehaviour
             int showTime = 0;
             showTime = timeItem * 10;
 
+
             //Debug.Log(timeItem);
-            if (timeItem < 0) {
-                /*if (haveAddTimeAbility && Random.Range(0,100) < percent[0]) {
+            if (timeItem < 0)
+            {
+                if (player.percentAddOrSub() && player.checkSkill() == EnumAbilityCode.ADD_TIME)
+                {
                     timeItem -= 1;
-                }*/
+                    skillActiveText.enabled = true;
+                    timeADDSUBWithItem.enabled = true;
+                    skillActiveText.text = "Skill Active!";
+                    timeADDSUBWithItem.text = "- 10";
+                    skillActiveText.color = Color.yellow;
+                    timeADDSUBWithItem.color = Color.yellow;
+
+                }
                 showTime = timeItem * 10;
-                timeADDSUB.text = showTime.ToString()+"s";
+                timeADDSUB.text = (showTime + 10).ToString() + "s";
                 timeADDSUB.color = Color.green;
                 int count = 0;
-                if (true) {
-                    while ((timeItem * (-1)) > count) {
+                if (true)
+                {
+                    while ((timeItem * (-1)) > count)
+                    {
                         Timer.SubtractTime();
                         count++;
-                    } }
+                    }
+                }
                 //speed
                 StartCoroutine(FreezTime(5));
             }
             else if (timeItem > 0)
             {
-                /*if (haveSubTimeAbility && Random.Range(0, 100) < percent[1])
+                if (player.percentAddOrSub() && player.checkSkill() == EnumAbilityCode.SUB_TIME)
                 {
                     timeItem -= 1;
-                }*/
-                
-                timeADDSUB.text = "+" + showTime.ToString()+"s";
+                    skillActiveText.enabled = true;
+                    timeADDSUBWithItem.enabled = true;
+                    skillActiveText.text = "Skill Active!";
+                    timeADDSUBWithItem.text = "- 10";
+                    skillActiveText.color = Color.yellow;
+                    timeADDSUBWithItem.color = Color.yellow;
+
+                }
+                timeADDSUB.text = "+" + (showTime + 10).ToString() + "s";
                 timeADDSUB.color = Color.red;
                 int count = 0;
                 while (timeItem > count)
@@ -87,6 +94,12 @@ public class TriggerItem : MonoBehaviour
                     Timer.AddTime();
                     count++;
                 }
+                StartCoroutine(showTextWhenAddTime(5));
+            }
+            else { 
+                timeADDSUB.enabled = false;
+                timeADDSUB.text = "0";
+                timeADDSUB.color = Color.white;
                 StartCoroutine(showTextWhenAddTime(5));
             }
 
@@ -105,12 +118,16 @@ public class TriggerItem : MonoBehaviour
         stopImage.enabled = false;
         stopBackground.enabled = false;
         timeADDSUB.enabled = false;
+        skillActiveText.enabled = false;
+        timeADDSUBWithItem.enabled = false;
     }
 
     IEnumerator showTextWhenAddTime(int cooldown)
     {
         yield return new WaitForSeconds(cooldown);
         timeADDSUB.enabled = false;
+        skillActiveText.enabled = false;
+        timeADDSUBWithItem.enabled = false;
     }
 
 

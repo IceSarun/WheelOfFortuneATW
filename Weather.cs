@@ -8,4 +8,6 @@ public class Weather
     public string weatherName;
     public GameObject weather;
     public Sprite imageWeather;
+    public AudioClip soundOfWheather;
+    
 }

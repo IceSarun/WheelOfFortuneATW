@@ -8,7 +8,6 @@ using UnityEngine;
 public class Character 
 {
     public string nameChar;
-    public int characterCode;
     public Sprite imageCharacter;
     public EnumAbilityCode abilityCode;
     public int value;

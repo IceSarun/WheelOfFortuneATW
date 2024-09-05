@@ -14,6 +14,9 @@ public class CharacterManager : MonoBehaviour
     public Sprite artworkSprite;
     public Image charImage; 
     private int selectOption = 0;
+    public Image selected;
+    public AudioSource clickButtonSound;
+    private int rememberSelect = 0;
 
     void Start()
     {
@@ -23,7 +26,9 @@ public class CharacterManager : MonoBehaviour
         else{
             load();
         }
+        rememberSelect = selectOption;
         updateCharacter(selectOption);
+        selected.enabled = true;
     }
 
     public void nextOption() { 
@@ -32,7 +37,15 @@ public class CharacterManager : MonoBehaviour
             selectOption = 0;
         }
         updateCharacter(selectOption);
-        save();
+        if (selectOption == rememberSelect)
+        {
+            selected.enabled = true;
+        }
+        else
+        {
+            selected.enabled = false;
+        }
+        clickButtonSound.Play();
     }
 
     public void backOption()
@@ -43,7 +56,16 @@ public class CharacterManager : MonoBehaviour
             selectOption = characterDB.characterCount() -1;
         }
         updateCharacter(selectOption);
-        save();
+        if (selectOption == rememberSelect)
+        {
+            selected.enabled = true;
+        }
+        else
+        {
+            selected.enabled = false;
+        }
+        clickButtonSound.Play();
+
     }
 
     public void updateCharacter(int selectOption) {
@@ -64,9 +86,18 @@ public class CharacterManager : MonoBehaviour
     private void save() { 
         PlayerPrefs.SetInt("selectedOption", selectOption);
     }
+    public void selectedOption()
+    {
+        save();
+        selected.enabled = true;
+        rememberSelect = selectOption;
+        clickButtonSound.Play();
+    }
 
     public void changeScene() {
+      
         SceneManager.LoadScene("Lobby");
+        clickButtonSound.Play();
     }
 
     public void checkAbility(string textAbi, int value) {
@@ -81,19 +112,19 @@ public class CharacterManager : MonoBehaviour
                 break;
 
             case "WEATHER_RAIN":
-                abilityText.text += "Create rain in map and Decrease the opponent's max speed by " + value.ToString();
+                abilityText.text += "Protect rain in map" ;
                 break;
 
             case "WEATHER_WIND":
-                abilityText.text += "Create wind in map and Decrease the opponent's max speed by " + value.ToString();
+                abilityText.text += "Protect wind in map";
                 break;
 
             case "WEATHER_SMOKE":
-                abilityText.text += "Create smoke in map and Decrease the opponent's max speed by " + value.ToString();
+                abilityText.text += "Protect smoke in map ";
                 break;
 
             case "WEATHER_SNOW":
-                abilityText.text += "Create snow in map and Decrease the opponent's max speed by " + value.ToString();
+                abilityText.text += "Protect snow in map ";
                 break;
 
             case "ADD_TIME":

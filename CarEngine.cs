@@ -69,6 +69,7 @@ public class CarEngine : MonoBehaviour
     public Sprite artworkSprite;
     public Image charImage;
     public int randomOption = 0;
+    private WeatherManage weather;
 
     void Start()
     {
@@ -76,14 +77,15 @@ public class CarEngine : MonoBehaviour
         //set Time
         timer = 0f;
         //set character
+        weather = FindObjectOfType<WeatherManage>();
         setCharacter();
-
+   
         //set Path
-        numberOfPath = Random.Range(0, allPath.Length - 1);
+        numberOfPath = Random.Range(0, allPath.Length -1);
         //Debug.Log(requirePoint[numberOfPath]);
-        //path = allPath[numberOfPath];
         realPlayer = GameObject.FindGameObjectWithTag("Player");
         path = allPath[0];
+
         Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
         countAllCheckpointInPath = pathTransforms.Length;
         pathList = new Dictionary<int, Transform>();
@@ -126,9 +128,51 @@ public class CarEngine : MonoBehaviour
         character = characterDB.getCharacter(selectOption);
         artworkSprite = character.imageCharacter;
         charImage.sprite = artworkSprite;
+        setAbility();
+
+        //Debug.Log("name" + weather.getWeatherName());
 
     }
 
+    public void setAbility()
+    {
+        switch (character.abilityCode)
+        {
+            case EnumAbilityCode.UNSPECIFIED:
+                
+                break;
+
+            case EnumAbilityCode.MAX_SPEED:
+                
+                break;
+
+            case EnumAbilityCode.WEATHER_RAIN:
+                
+                break;
+
+            case EnumAbilityCode.WEATHER_WIND:
+                
+                break;
+
+            case EnumAbilityCode.WEATHER_SMOKE:
+                
+                break;
+
+            case EnumAbilityCode.WEATHER_SNOW:
+                
+                break;
+
+            case EnumAbilityCode.ADD_TIME:
+                
+                break;
+
+            case EnumAbilityCode.SUB_TIME:
+                
+                break;
+
+        }
+
+    }
 
     public void OnTriggerEnter(Collider collider)
     {
@@ -438,8 +482,13 @@ public class CarEngine : MonoBehaviour
         {
             return (int)timer;
         }
+        
     }
 
+    public int getTimeAIWhenWin()
+    {
+         return timeWhenWin;
+        
+    }
 
-  
 }
